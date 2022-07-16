@@ -1,15 +1,48 @@
 import requests
 from bs4 import BeautifulSoup
-
-URL = "https://esco.ec.europa.eu/en/classification/occupation?uri=http%3A%2F%2Fdata.europa.eu%2Fesco%2Foccupation%2F47e81c7f-2d04-4a60-a8ff-9913c36d8344"
-r = requests.get(URL)
-
-soup = BeautifulSoup(r.content, 'html5lib')
-
-descriptions = soup.findAll('div', attrs={'class': 'description'})
+import pandas as pd
 
 
-for d in descriptions:
-    paragraphs = d.findAll('p')
-    for i, p in enumerate(paragraphs):
-        print(i, p.text)
+def get_description(web: BeautifulSoup) -> str:
+    """
+    Returns the description of the Job Title.
+    :param web: BeautifulSoup object of the website.
+    :return: description (string)
+    """
+    descriptions = web.findAll('div', attrs={'class': 'description'})
+    for i, d in enumerate(descriptions):
+        paragraphs = d.findAll('p')
+        for j, p in enumerate(paragraphs):
+            if i == 2 and j == 1:
+                return p.text
+
+
+def get_code(web: BeautifulSoup) -> str:
+    """
+    Returns the code of the Job Title.
+    :param web: BeautifulSoup object of the website.
+    :return: code (string)
+    """
+    descriptions = web.findAll('div', attrs={'class': 'code'})
+    for i, d in enumerate(descriptions):
+        paragraphs = d.findAll('p')
+        return paragraphs[1].text
+
+
+if __name__ == "__main__":
+    columns = ['occupation', 'code', 'description']
+    a = []
+    meta_data = pd.read_csv('data/titles.test.csv')
+    for url in meta_data['conceptUri']:
+        redirected_url = 'https://esco.ec.europa.eu/en/classification/occupation?uri='
+        r = requests.get(redirected_url + url)
+        soup = BeautifulSoup(r.content, 'html5lib')
+        occupation = str(soup.findAll('h3')[0].string).strip()
+        code = get_code(soup)
+        description = get_description(soup)
+        row = [occupation, code, description]
+        a.append(row)
+        # break
+
+    df = pd.DataFrame(a, columns=columns)
+    df.to_excel("data/df.xlsx")
