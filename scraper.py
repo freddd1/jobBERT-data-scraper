@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from tqdm import tqdm
-import time
+
 
 def get_description(web: BeautifulSoup) -> str:
     """
@@ -30,11 +30,11 @@ def get_code(web: BeautifulSoup) -> str:
         return paragraphs[1].text
 
 
-def get_atr_label(web: BeautifulSoup) -> str:
+def get_atr_label(web: BeautifulSoup) -> []:
     """
     Returns the alternative label of the Job Title.
     :param web: BeautifulSoup object of the website.
-    :return: alternative label (string)
+    :return: alternative label (list of strings)
     """
     descriptions = web.findAll('div', attrs={'class': 'alternative-labels'})
     alter_labels = []
@@ -45,11 +45,11 @@ def get_atr_label(web: BeautifulSoup) -> str:
     return alter_labels
 
 
-def get_skills(web: BeautifulSoup) -> str:
+def get_skills(web: BeautifulSoup) -> []:
     """
     Returns the skills of the Job Title.
     :param web: BeautifulSoup object of the website.
-    :return: alternative label (string)
+    :return: alternative label (list of string)
     """
     descriptions = web.findAll('div', attrs={'class': 'essential-skills-list'})
     skills = []
@@ -60,12 +60,11 @@ def get_skills(web: BeautifulSoup) -> str:
     return skills
 
 
-
 if __name__ == "__main__":
     columns = ['occupation', 'code', 'description', 'alternative_labels', 'skills']
     a = []
     meta_data = pd.read_csv('data/titles.test.csv')
-    for url in tqdm(meta_data['conceptUri'], desc='tqdm() Progress Bar'):
+    for url in tqdm(meta_data['conceptUri'], desc='Progress Bar'):
         redirected_url = 'https://esco.ec.europa.eu/en/classification/occupation?uri='
         r = requests.get(redirected_url + url)
         soup = BeautifulSoup(r.content, 'html5lib')
