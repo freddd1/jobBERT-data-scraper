@@ -60,8 +60,54 @@ def get_skills(web: BeautifulSoup) -> []:
     return skills
 
 
+def get_knowledge(web: BeautifulSoup) -> []:
+    """
+    Returns the Essential Knowledge the Job Title.
+    :param web: BeautifulSoup object of the website.
+    :return: alternative label (list of string)
+    """
+    descriptions = web.findAll('div', attrs={'class': 'essential-knowledge-list'})
+    knowledge = []
+    for i, d in enumerate(descriptions):
+        paragraphs = d.findAll('a')
+        for j, p in enumerate(paragraphs):
+            knowledge.append(p.text)
+    return knowledge
+
+
+def get_opt_skills(web: BeautifulSoup) -> []:
+    """
+    Returns the Optional Skills and Competences of the Job Title.
+    :param web: BeautifulSoup object of the website.
+    :return: alternative label (list of string)
+    """
+    descriptions = web.findAll('div', attrs={'class': 'optional-skills-list'})
+    opt_skills = []
+    for i, d in enumerate(descriptions):
+        paragraphs = d.findAll('a')
+        for j, p in enumerate(paragraphs):
+            opt_skills.append(p.text)
+    return opt_skills
+
+
+def get_opt_knowledge(web: BeautifulSoup) -> []:
+    """
+    Returns the Optional Skills and Competences of the Job Title.
+    :param web: BeautifulSoup object of the website.
+    :return: alternative label (list of string)
+    """
+    descriptions = web.findAll('div', attrs={'class': 'optional-knowledge-list'})
+    opt_knowledge = []
+    for i, d in enumerate(descriptions):
+        paragraphs = d.findAll('a')
+        for j, p in enumerate(paragraphs):
+            opt_knowledge.append(p.text)
+    return opt_knowledge
+
+
 if __name__ == "__main__":
-    columns = ['occupation', 'code', 'description', 'alternative_labels', 'skills']
+    columns = ['occupation', 'code', 'description', 'alternative_labels', 'skills',
+               'knowledge', 'opt_skills', 'opt_knowledge']
     a = []
     meta_data = pd.read_csv('data/titles.test.csv')
     for url in tqdm(meta_data['conceptUri'], desc='Progress Bar'):
@@ -74,7 +120,10 @@ if __name__ == "__main__":
             description = get_description(soup)
             alternative_labels = get_atr_label(soup)
             skills = get_skills(soup)
-            row = [occupation, code, description, alternative_labels, skills]
+            knowledge = get_knowledge(soup)
+            opt_skills = get_opt_skills(soup)
+            opt_knowledge = get_opt_knowledge(soup)
+            row = [occupation, code, description, alternative_labels, skills, knowledge, opt_skills, opt_knowledge]
             a.append(row)
         except:
             print('Skipping-{} '.format(url))
